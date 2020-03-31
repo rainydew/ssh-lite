@@ -13,12 +13,13 @@ class KeyAbbr:
     """alias of combination keys"""
     CTRL_C = "\x03"
     CTRL_D = "\x04"
+    CTRL_Z = "\x1a"
 
 
 class Server(object):
     """a simple server that is easy to use"""
     def __init__(self, hostname: str, password: Optional[str] = None, username: str = "root", port: int = 22,
-                 key_path: Optional[str] = None, timeout: int = 10):
+                 key_path: Optional[str] = None, timeout: int = 10, debug: bool = False):
         chan = paramiko.SSHClient()
         pkey = paramiko.RSAKey.from_private_key(open(key_path, 'r')) if key_path else None
         chan.set_missing_host_key_policy(paramiko.AutoAddPolicy)
@@ -32,7 +33,7 @@ class Server(object):
         self.reading = False
         self.buff = b""
         self.last_recv = None
-        self.debug = False
+        self.debug = debug
         t = threading.Thread(target=self._block_data)
         t.setDaemon(True)
         t.start()

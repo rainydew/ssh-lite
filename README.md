@@ -1,6 +1,6 @@
 # SSH-Lite
 An easy encapsulation for paramiko library which contains only common operations.
-Version 1.0 is migrated from the original code for automatic testing / operation.
+Version 1.1 is migrated from the original code for automatic testing / operation.
 
 ## Features
 
