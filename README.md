@@ -1,6 +1,7 @@
 # SSH-Lite
-An easy encapsulation for paramiko library which contains only common operations.
-Version 1.1 is migrated from the original code for automatic testing / operation.
+An easy encapsulation for paramiko library which contains only common operations, useful for automatic test and CI/CD.
+
+Version 1.2 is a bugfix version that supports servers without SFTP service (e.g. Gateway Servers).
 
 ## Features
 
