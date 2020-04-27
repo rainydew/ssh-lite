@@ -123,7 +123,7 @@ class Server(object):
 
     def expect(self, pat: Union[str, List[str]], timeout: int = 15, success_info: bool = False) -> str:
         """
-        block until `pat` is found in buffer outputs
+        block until `pat` (or any item in `pat` if `pat` is a list) is found in buffer outputs
         if `timeout` reaches zero first, it will raise an AssertionError
         this method will clear the buff
         :param success_info: whether to print info if `pat` is found
