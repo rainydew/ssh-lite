@@ -13,7 +13,7 @@ except:
 
 setup(
     name='ssh-lite',
-    version='1.3',
+    version='1.4',
     description='An easy encapsulation for paramiko library which contains only common operations (ssh, sftp, expect..)',
     author='Rainy Chan',
     author_email='rainydew@qq.com',

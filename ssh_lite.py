@@ -2,8 +2,7 @@
 # coding: utf-8
 # author: Rainy Chan
 # mailto: rainydew@qq.com
-from typing import Optional, Union, List
-from io import TextIOWrapper
+from typing import Optional, Union, List, TextIO
 import paramiko
 import threading
 import time
@@ -21,7 +20,7 @@ class KeyAbbr:
 class Server(object):
     """a simple server that is easy to use"""
     def __init__(self, hostname: str, password: Optional[str] = None, username: str = "root", port: int = 22,
-                 key_path: Optional[str] = None, timeout: int = 10, debug: bool = False, debug_file: TextIOWrapper =
+                 key_path: Optional[str] = None, timeout: int = 10, debug: bool = False, debug_file: TextIO =
                  sys.stdout):
         """
         create a connection to a remote server

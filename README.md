@@ -1,7 +1,7 @@
 # SSH-Lite
 An easy encapsulation for paramiko library which contains only common operations, useful for automatic test and CI/CD.
 
-Version 1.3 is an enhance version that supports debug info redirection and expect-fail-assertion.
+Version 1.4 is an enhance version that supports debug info redirection and expect-fail-assertion.
 Version 1.2 is a bugfix version that supports servers without SFTP service (e.g. Gateway Servers).
 
 ## Features
