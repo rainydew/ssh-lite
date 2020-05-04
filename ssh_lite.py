@@ -3,6 +3,7 @@
 # author: Rainy Chan
 # mailto: rainydew@qq.com
 from typing import Optional, Union, List
+from io import TextIOWrapper
 import paramiko
 import threading
 import time
@@ -20,7 +21,8 @@ class KeyAbbr:
 class Server(object):
     """a simple server that is easy to use"""
     def __init__(self, hostname: str, password: Optional[str] = None, username: str = "root", port: int = 22,
-                 key_path: Optional[str] = None, timeout: int = 10, debug: bool = False):
+                 key_path: Optional[str] = None, timeout: int = 10, debug: bool = False, debug_file: TextIOWrapper =
+                 sys.stdout):
         """
         create a connection to a remote server
         use "del connection_variable" to disconnect
@@ -29,6 +31,7 @@ class Server(object):
         :param port: the ssh service port (firewall should accept)
         :param key_path: set it to the path of key file if server needs rsa key to auth
         :param debug: set it to True if you want to see realtime server input and output
+        :param debug_file: set a file/pipe obj (text mode) to write debug. NOTE this file will NOT close automatically
         """
         chan = paramiko.SSHClient()
         pkey = paramiko.RSAKey.from_private_key(open(key_path, 'r')) if key_path else None
@@ -49,6 +52,7 @@ class Server(object):
         self._buff = b""
         self.last_recv = None   # time of last receiving bytes
         self.debug = debug
+        self._debug_file = debug_file
         t = threading.Thread(target=self._block_data)
         t.setDaemon(True)
         t.start()
@@ -91,8 +95,8 @@ class Server(object):
             self._buff += res
             self.last_recv = time.time()
             if self.debug:
-                sys.stdout.buffer.write(res)
-                sys.stdout.flush()
+                self._debug_file.write(res.decode("utf-8", errors="replace"))
+                self._debug_file.flush()
 
     def send_and_read(self, cmd: str, end: str = '\n', timeout: int = 3) -> str:
         """
@@ -121,25 +125,30 @@ class Server(object):
         self._reading = False
         return buff.decode("utf-8", errors="replace")
 
-    def expect(self, pat: Union[str, List[str]], timeout: int = 15, success_info: bool = False) -> str:
+    def expect(self, pat: Union[str, List[str]], timeout: int = 15, failpat: Union[None, str, List[str]] = None,
+               success_info: bool = False) -> str:
         """
         block until `pat` is found in buffer outputs
         if `timeout` reaches zero first, it will raise an AssertionError
         this method will clear the buff
+        :param failpat: raise if failpat set and was found in output before `pat` was found
         :param success_info: whether to print info if `pat` is found
         :return: all above outputs ended with line that includes `pat`
         """
         assert type(pat) in (str, list), "unsupported type"
         pat_b = pat.encode("utf-8") if type(pat) != list else [x.encode('utf-8') for x in pat]
         s = time.time()
+        self._check_fail(failpat)
         if type(pat_b) != list:
             while pat_b not in self._buff:
                 time.sleep(0.1)
+                self._check_fail(failpat)
                 if timeout:
                     assert s + timeout >= time.time(), "expect timeout"
         else:
             while all([x not in self._buff for x in pat_b]):
                 time.sleep(0.1)
+                self._check_fail(failpat)
                 if timeout:
                     assert s + timeout >= time.time(), "expect timeout"
         res = self._buff.decode("utf-8", errors="replace")
@@ -177,3 +186,12 @@ class Server(object):
         self.chan.close()
         if self._ftp:
             self._ftp.close()
+
+    def _check_fail(self, failpat: Union[None, str, List[str]]):
+        if failpat is not None:
+            if type(failpat) == str:
+                if failpat in self._buff:
+                    raise AssertionError("fail pattern {} found".format(failpat))
+            else:
+                if any([x in self._buff for x in failpat]):
+                    raise AssertionError("a fail pattern of {} found".format(failpat))

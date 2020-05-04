@@ -1,6 +1,7 @@
 # SSH-Lite
 An easy encapsulation for paramiko library which contains only common operations, useful for automatic test and CI/CD.
 
+Version 1.3 is an enhance version that supports debug info redirection and expect-fail-assertion.
 Version 1.2 is a bugfix version that supports servers without SFTP service (e.g. Gateway Servers).
 
 ## Features
@@ -10,8 +11,9 @@ Version 1.2 is a bugfix version that supports servers without SFTP service (e.g.
 	* *send_and_read* is the most common, for sending a command and read all returnes in a timeout period (timeout will be updated after receiving any bytes)
 	* *get_buff* for reading all buffers from the terminal in a timeout period
 * Uploading or downloading files between local and remote server
-* Expect function (may raise an exception for timeout)
+* Expect function (may raise an exception for timeout or any unexpect pattern you set)
 * Grep function and keys abbreviations
+* Output redirection
 
 ## QuickStart
 
