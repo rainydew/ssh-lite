@@ -1,8 +1,11 @@
 # SSH-Lite
 An easy encapsulation for paramiko library which contains only common operations, useful for automatic test and CI/CD.
 
-Version 1.4 is an enhance version that supports debug info redirection and expect-fail-assertion.
-Version 1.2 is a bugfix version that supports servers without SFTP service (e.g. Gateway Servers).
+Updates:
+* Version 1.7 is a bugfix version that fix bugs in doc and lower the chance of messy code (bc multi bytes character splits into different segments)
+* Version 1.5 is a bugfix version that handle possible *UnicodeEncodeError* of terminal output when using an actually bytesIO terminal as *debug_file* (i.e. stdout).
+* Version 1.4 is an enhance version that supports debug info redirection and expect-fail-assertion.
+* Version 1.2 is a bugfix version that supports servers without SFTP service (e.g. Gateway Servers).
 
 ## Features
 
@@ -69,7 +72,8 @@ with Server("127.0.0.1", "123456", "root", port=22, key_path=None) as ci:  # typ
         file)
     print("inner cmd is: {}".format(cmd))
     ci.send(cmd)
-    ci.expect("< HTTP/1.1 200 OK", timeout=30)      # will raise an exception if we cannot see 200 OK response in 30 secs
+    ci.expect("< HTTP/1.1 200 OK", timeout=30, failpat=["< HTTP/1.1 4", "< HTTP/1.1 5"])      
+    # will raise an exception if we cannot see 200 OK response in 30 secs or if we find any 4xx 5xx response
     ci.send(KeyAbbr.CTRL_C, end="")      # sending a CTRL+C to exit the HTTP2 long connection
     ci.send('exit')       # exit from container to release the connection
 ```

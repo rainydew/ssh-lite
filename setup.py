@@ -13,13 +13,12 @@ except:
 
 setup(
     name='ssh-lite',
-    version='1.4',
+    version='1.7',
     description='An easy encapsulation for paramiko library which contains only common operations (ssh, sftp, expect..)',
     author='Rainy Chan',
     author_email='rainydew@qq.com',
     url='https://github.com/rainydew/ssh-lite',
     py_modules=['ssh_lite'],
-    scripts=['ssh_lite.py'],
     install_requires=['paramiko>=2.5.0'],
     keywords='ssh sftp easy paramiko non-blocking',
     long_description=long_description,

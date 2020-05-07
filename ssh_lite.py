@@ -8,6 +8,7 @@ import threading
 import time
 import sys
 import warnings
+import locale
 
 
 class KeyAbbr:
@@ -21,7 +22,7 @@ class Server(object):
     """a simple server that is easy to use"""
     def __init__(self, hostname: str, password: Optional[str] = None, username: str = "root", port: int = 22,
                  key_path: Optional[str] = None, timeout: int = 10, debug: bool = False, debug_file: TextIO =
-                 sys.stdout):
+                 sys.stdout, disable_warnings: bool = False):
         """
         create a connection to a remote server
         use "del connection_variable" to disconnect
@@ -38,10 +39,12 @@ class Server(object):
         chan.connect(hostname, port, username, password, pkey, timeout=timeout)
         tp = paramiko.Transport(sock=(hostname, port))
         tp.connect(username=username, password=password, pkey=pkey)
+        self._disable_warnings = disable_warnings
         try:
             ftp = paramiko.SFTPClient.from_transport(tp)
         except:
-            warnings.warn("WARNING ftp connect failed of {}, set to None\n".format(hostname))
+            if not self._disable_warnings:
+                warnings.warn("WARNING ftp connect failed of {}, set to None\n".format(hostname))
             self._ftp = None
         else:
             self._ftp = ftp
@@ -88,13 +91,24 @@ class Server(object):
 
     def _block_data(self):
         while 1:
-            res = self.ssh.recv(64)
+            res = self.ssh.recv(4096)
             if not res:
                 break
             self._buff += res
             self.last_recv = time.time()
             if self.debug:
-                self._debug_file.write(res.decode("utf-8", errors="replace"))
+                try:
+                    self._debug_file.write(res.decode("utf-8", errors="replace"))
+                except UnicodeEncodeError:
+                    try:
+                        self._debug_file.buffer.write(res.decode("utf-8", errors="replace").encode(
+                            locale.getpreferredencoding()))
+                    except:
+                        try:
+                            self._debug_file.buffer.write(res)
+                        except:
+                            if not self._disable_warnings:
+                                warnings.warn("WARNING cannot recognized bytes seq {}\n".format(res))
                 self._debug_file.flush()
 
     def send_and_read(self, cmd: str, end: str = '\n', timeout: int = 3) -> str:
@@ -130,7 +144,7 @@ class Server(object):
         block until `pat` (or any item in `pat` if `pat` is a list) is found in buffer outputs
         if `timeout` reaches zero first, it will raise an AssertionError
         this method will clear the buff
-        :param failpat: raise if failpat set and was found in output before `pat` was found
+        :param failpat: raise an AssertionError if failpat set and was found in output before `pat` was found
         :param success_info: whether to print info if `pat` is found
         :return: all above outputs ended with line that includes `pat`
         """
