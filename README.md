@@ -3,7 +3,7 @@ An easy encapsulation for paramiko library which contains only common operations
 
 Updates:
 
-* Version 1.8 supports python2 code for old projects.
+* Version 1.9 supports python2 code for old projects.
 * Version 1.7 is a bugfix version that fixes bugs in doc and lower the chance of messy code (bc multi bytes character splits into different segments).
 * Version 1.5 is a bugfix version that handles possible *UnicodeEncodeError* of terminal output when using an actually bytesIO terminal as *debug_file* (i.e. stdout).
 * Version 1.4 is an enhance version that supports debug info redirection and expect-fail-assertion.

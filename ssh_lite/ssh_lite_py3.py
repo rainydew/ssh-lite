@@ -59,6 +59,15 @@ class Server(object):
         t.setDaemon(True)
         t.start()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.ssh.close()
+        self.chan.close()
+        if self._ftp:
+            self._ftp.close()
+
     def put_file(self, local: str, remote: str):
         """
         push a file to server
@@ -195,10 +204,19 @@ class Server(object):
         """
         disconnect
         """
-        self.ssh.close()  # to stop blockData
-        self.chan.close()
+        try:
+            self.ssh.close()  # to stop blockData
+        except:
+            pass
+        try:
+            self.chan.close()
+        except:
+            pass
         if self._ftp:
-            self._ftp.close()
+            try:
+                self._ftp.close()
+            except:
+                pass
 
     def _check_fail(self, failpat: Union[None, str, List[str]]):
         if failpat is not None:
